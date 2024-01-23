@@ -1,0 +1,517 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<baseviews:ViewBase
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:baseviews="clr-namespace:MauiTubePlayer.Views.Base"
+    xmlns:viewmodels="clr-namespace:MauiTubePlayer.ViewModels"
+    xmlns:models="clr-namespace:MauiTubePlayer.Models"
+    xmlns:controls="clr-namespace:MauiTubePlayer.ViewControls"
+    xmlns:botshtcontrols="clr-namespace:XGENO.Maui.Controls;assembly=Maui.Controls.BottomSheet"
+    xmlns:converters="clr-namespace:Maui.Apps.Framework.Converters;assembly=Maui.Apps.Framework"
+    xmlns:xct="http://xamarin.com/schemas/2020/toolkit"
+    x:Class="MauiTubePlayer.Views.VideoDetailsPage"
+    x:TypeArguments="viewmodels:VideoDetailsPageViewModel"
+    x:DataType="viewmodels:VideoDetailsPageViewModel"
+    PageTitle="{Binding Title, Mode=OneWay}"
+    PageMode="Navigate"
+    ContentDisplayMode="NavigationBar"
+    x:Name="RootPage">
+
+    <baseviews:ViewBase.Resources>
+        <converters:EnumerationContainsElementConverter x:Key="cvtVisibleOnItemCount"/>
+    </baseviews:ViewBase.Resources>
+
+    <baseviews:ViewBase.PageContent>
+
+        <Grid
+            RowDefinitions="160,Auto,Auto,Auto,Auto,Auto,*,56"
+            RowSpacing="12"
+            Margin="16,0"
+            IsVisible="{Binding DataLoaded, Mode=OneWay}"
+            IgnoreSafeArea="True">
+
+            <!-- Top area aith Poster -->
+            <Frame
+                HasShadow="True"
+                CornerRadius="8"
+                HorizontalOptions="Fill"
+                VerticalOptions="Fill"
+                IsClippedToBounds="True"
+                Padding="0"
+                Grid.Row="0"
+                Opacity="0"
+                x:Name="HeaderView">
+
+                <Grid
+                    IsClippedToBounds="True"
+                    VerticalOptions="Fill"
+                    HorizontalOptions="Fill">
+
+                    <!-- Poster Image -->
+                    <Image
+                        VerticalOptions="Fill"
+                        HorizontalOptions="Fill"
+                        Aspect="AspectFill"
+                        Margin="0">
+                        <Image.Source>
+                            <UriImageSource
+                                Uri="{Binding TheVideo.Snippet.Thumbnails.High.Url, Mode=OneWay}"
+                                CacheValidity="1:00:00.0" />
+                        </Image.Source>
+                    </Image>
+
+                    <!-- Play Button -->
+                    <ImageButton
+                        Source="imgplay.png"
+                        HeightRequest="64"
+                        WidthRequest="64"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Center"
+                        Clicked="VideoPlayerButton_Clicked"/>
+
+                    <!-- Duration -->
+                    <Border
+                        Padding="8"
+                        VerticalOptions="End"
+                        HorizontalOptions="End"
+                        Margin="8"
+                        Stroke="Transparent"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 4"
+                        BackgroundColor="{StaticResource DarkColor}">
+                        <Label
+                            Text="{Binding TheVideo.VideoDuration, Mode=OneWay}"
+                            Style="{StaticResource MediumLightText10}"
+                            VerticalOptions="Center"
+                            VerticalTextAlignment="Center"/>
+                    </Border>
+
+                    <!-- Media Player -->
+                    <xct:MediaElement
+                        x:Name="VideoPlayer"
+                        IsVisible="False"
+                        HorizontalOptions="Fill"
+                        VerticalOptions="Fill"
+                        ShowsPlaybackControls="True"
+                        AutoPlay="False"
+                        Source="{Binding VideoSource, Mode=OneWay}" />
+
+
+                </Grid>
+
+            </Frame>
+
+            <!-- Video Title -->
+            <VerticalStackLayout
+                x:Name="VideoTitle"
+                Grid.Row="1"
+                HorizontalOptions="Fill"
+                Opacity="0"
+                Spacing="2">
+
+                <Label
+                    Style="{StaticResource MediumLightText20}"
+                    Text="{Binding TheVideo.Snippet.Title, Mode=OneWay}" />
+
+                <Label
+                    Style="{StaticResource RegularLightText14}"
+                    Text="{Binding TheVideo.VideoSubtitle, Mode=OneWay}" />
+
+            </VerticalStackLayout>
+
+            <!-- Icons -->
+            <FlexLayout
+                x:Name="VideoIcons"
+                Grid.Row="2"
+                HorizontalOptions="Fill"
+                Opacity="0"
+                Direction="Row"
+                JustifyContent="SpaceBetween"
+                AlignContent="Stretch"
+                Margin="0,8">
+
+                <!-- Likes -->
+                <HorizontalStackLayout
+                    Spacing="6"
+                    VerticalOptions="Center">
+
+                    <Image
+                        Source="imglike.png"
+                        WidthRequest="16"
+                        HeightRequest="16" />
+
+                    <Label
+                        Style="{StaticResource RegularLightText14}"
+                        Text="{Binding TheVideo.LikesCount, Mode=OneWay}" />
+
+                </HorizontalStackLayout>
+
+                <!-- Dislikes -->
+                <HorizontalStackLayout
+                    Spacing="6"
+                    VerticalOptions="Center">
+
+                    <HorizontalStackLayout.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding UnlikeVideoCommand, Mode=OneWay}" />
+                    </HorizontalStackLayout.GestureRecognizers>
+
+                    <Image
+                        Source="imglike.png"
+                        Rotation="180"
+                        WidthRequest="16"
+                        HeightRequest="16" />
+
+                    <Label
+                        Style="{StaticResource RegularLightText14}"
+                        Text="Unlike" />
+
+                </HorizontalStackLayout>
+
+                <!-- Share -->
+                <HorizontalStackLayout
+                    Spacing="6"
+                    VerticalOptions="Center">
+
+                    <HorizontalStackLayout.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ShareVideoCommand, Mode=OneWay}" />
+                    </HorizontalStackLayout.GestureRecognizers>
+
+                    <Image
+                        Source="imgshare.png"
+                        WidthRequest="16"
+                        HeightRequest="16" />
+
+                    <Label
+                        Style="{StaticResource RegularLightText14}"
+                        Text="Share" />
+
+                </HorizontalStackLayout>
+
+                <!-- Download -->
+                <HorizontalStackLayout
+                    Spacing="6"
+                    VerticalOptions="Center">
+
+                    <HorizontalStackLayout.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding DownloadVideoCommand, Mode=OneWay}" />
+                    </HorizontalStackLayout.GestureRecognizers>
+
+                    <Image
+                        Source="imgdownload.png"
+                        WidthRequest="16"
+                        HeightRequest="16" />
+
+                    <Label
+                        Style="{StaticResource RegularLightText14}"
+                        Text="Download" />
+
+                </HorizontalStackLayout>
+
+            </FlexLayout>
+
+            <!-- Channel Details -->
+            <Grid
+                x:Name="ChannelDetails"
+                Opacity="0"
+                Grid.Row="3"
+                ColumnSpacing="12"
+                ColumnDefinitions="Auto,*,Auto"
+                RowDefinitions="Auto,Auto">
+
+                <!-- Channel Pic -->
+                <Border
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    VerticalOptions="Center"
+                    Stroke="{StaticResource LightBorderColor}"
+                    StrokeThickness="2"
+                    StrokeShape="RoundRectangle 22"
+                    Grid.Row="0"
+                    Grid.RowSpan="2"
+                    Grid.Column="0">
+
+                    <Image
+                        VerticalOptions="Center"
+                        HorizontalOptions="Center"
+                        WidthRequest="40"
+                        HeightRequest="40"
+                        Aspect="AspectFill">
+
+                        <Image.Clip>
+                            <EllipseGeometry
+                                Center="20,20"
+                                RadiusX="20"
+                                RadiusY="20"/>
+                        </Image.Clip>
+
+                        <Image.Source>
+                            <UriImageSource
+                                Uri="{Binding TheChannel.Snippet.Thumbnails.High.Url, Mode=OneWay}"
+                                CacheValidity="1:00:00.0" />
+                        </Image.Source>
+                    </Image>
+
+                </Border>
+
+                <!-- Channel Name -->
+                <Label
+                    Style="{StaticResource MediumLightText18}"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Text="{Binding TheChannel.Snippet.Title, Mode=OneWay}" />
+
+                <!-- Subscriber Count -->
+                <Label
+                    Style="{StaticResource RegularLightText14}"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Text="{Binding TheChannel.SubscribersCount, Mode=OneWay}" />
+
+                <!-- Subscribe Button -->
+                <Button
+                    Grid.Row="0"
+                    Grid.RowSpan="2"
+                    Grid.Column="2"
+                    Padding="12,0"
+                    CornerRadius="6"
+                    HeightRequest="32"
+                    Text="Subscribe"
+                    TextColor="White"
+                    FontSize="12"
+                    FontFamily="MediumFont"
+                    Background="#FF0000"
+                    Command="{Binding SubscribeChannelCommand, Mode=OneWay}" />
+
+            </Grid>
+
+            <!-- Similar -->
+            <CollectionView
+                x:Name="SimilarVideos"
+                Grid.Row="5"
+                Opacity="0"
+                IsVisible="{Binding SimilarVideos, Mode=OneWay, Converter={StaticResource cvtVisibleOnItemCount}}"
+                HeightRequest="140"
+                ItemsSource="{Binding SimilarVideos, Mode=OneWay}">
+
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout
+                        Orientation="Horizontal"
+                        ItemSpacing="8" />
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <controls:SmallVideoCell
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Fill" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Tags -->
+            <CollectionView
+                x:Name="TagsView"
+                Grid.Row="4"
+                Opacity="0"
+                IsVisible="{Binding TheVideo.Snippet.Tags, Mode=OneWay, Converter={StaticResource cvtVisibleOnItemCount}}"
+                HeightRequest="28"
+                ItemsSource="{Binding TheVideo.Snippet.Tags, Mode=OneWay}"
+                ItemSizingStrategy="MeasureAllItems">
+
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout
+                        Orientation="Horizontal"
+                        ItemSpacing="16" />
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border
+                            BackgroundColor="{StaticResource DarkColor}"
+                            VerticalOptions="Fill"
+                            Stroke="{StaticResource LightBorderColor}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 14"
+                            Padding="16,0">
+                            <Label
+                                Text="{Binding .}"
+                                Style="{StaticResource RegularLightText16}"
+                                VerticalOptions="Center"
+                                VerticalTextAlignment="Center"/>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Description -->
+            <ScrollView
+                Grid.Row="6"
+                x:Name="DescriptionView"
+                Opacity="0">
+                <Label
+                    HorizontalOptions="Fill"
+                    Style="{StaticResource RegularLightText14}"
+                    LineBreakMode="WordWrap"
+                    Text="{Binding TheVideo.Snippet.Description, Mode=OneWay}"/>
+            </ScrollView>
+
+            <!-- Comments Button -->
+            <Button
+                x:Name="btnComments"
+                Grid.Row="7"
+                Opacity="0"
+                Padding="0"
+                Margin="0,0,0,16"
+                CornerRadius="8"
+                VerticalOptions="Fill"
+                HorizontalOptions="Fill"
+                Text="Comments"
+                TextColor="White"
+                FontSize="18"
+                FontFamily="MediumFont"
+                BorderColor="{StaticResource LightBorderColor}"
+                BorderWidth="0.5"
+                Background="{StaticResource DarkColor}"
+                Clicked="btnComments_Clicked"/>
+
+            <!-- Progress Bar-->
+            <ContentView
+                IsVisible="{Binding IsDownloading, Mode=OneWay}"
+                Grid.Row="7"
+                VerticalOptions="Fill"
+                HorizontalOptions="Fill"
+                BackgroundColor="{StaticResource PageBackgroundColor}"
+                Margin="0,0,0,16">
+
+                <VerticalStackLayout                
+                    Spacing="8"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Fill">
+
+                    <ProgressBar
+                        Progress="{Binding ProgressValue, Mode=OneWay}"
+                        HorizontalOptions="Fill"/>
+
+                    <Label
+                        Text="{Binding ProgressValue, Mode=OneWay, StringFormat='{0:P1}'}"
+                        HorizontalOptions="Center"
+                        Style="{StaticResource RegularLightText14}" />
+
+                </VerticalStackLayout>
+
+            </ContentView>
+
+
+
+            <!-- Comments Sheet -->
+            <botshtcontrols:BottomSheet
+                Margin="-16,0"
+                x:Name="CommentsBottomSheet"
+                Grid.Row="0"
+                Grid.RowSpan="8"
+                HeaderText="{Binding TheVideo.CommentsCount, Mode=OneWay, StringFormat='COMMENTS ({0})'}"
+                HeaderStyle="{StaticResource PageHeaderTextStyle}"
+                SheetHeight="660"
+                Theme="Dark">
+                <botshtcontrols:BottomSheet.BottomSheetContent>
+
+                    <CollectionView
+                        ItemsSource="{Binding Comments, Mode=OneWay}"
+                        ItemSizingStrategy="MeasureAllItems">
+
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout
+                                Orientation="Vertical"
+                                ItemSpacing="12" />
+                        </CollectionView.ItemsLayout>
+
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate
+                                x:DataType="models:Comment">
+                                <Border
+                                    BackgroundColor="{StaticResource DarkColor}"
+                                    StrokeShape="RoundRectangle 8"
+                                    Padding="16"
+                                    HorizontalOptions="Fill"
+                                    VerticalOptions="FillAndExpand">
+
+                                    <Grid
+                                        RowDefinitions="Auto,*"
+                                        ColumnDefinitions="32,*,Auto"
+                                        VerticalOptions="FillAndExpand"
+                                        RowSpacing="6"
+                                        ColumnSpacing="12"
+                                        BackgroundColor="{StaticResource DarkColor}">
+
+                                         <Border
+                                            WidthRequest="32"
+                                            HeightRequest="32"
+                                            VerticalOptions="Start"
+                                            Stroke="{StaticResource LightBorderColor}"
+                                            StrokeThickness="1"
+                                            StrokeShape="RoundRectangle 16"
+                                            Grid.Row="0"
+                                            Grid.RowSpan="2"
+                                            Grid.Column="0">
+
+                                            <Image
+                                                VerticalOptions="Center"
+                                                HorizontalOptions="Center"
+                                                WidthRequest="30"
+                                                HeightRequest="30">
+
+                                                <Image.Clip>
+                                                    <EllipseGeometry
+                                                        Center="15,15"
+                                                        RadiusX="15"
+                                                        RadiusY="15"/>
+                                                </Image.Clip>
+
+                                                <Image.Source>
+                                                    <UriImageSource
+                                                        Uri="{Binding Snippet.TopLevelComment.Snippet.AuthorProfileImageUrl, Mode=OneWay}"
+                                                        CacheValidity="1:00:00.0" />
+                                                </Image.Source>
+                                            </Image>
+
+                                        </Border>
+
+                                        <Label
+                                            Text="{Binding Snippet.TopLevelComment.Snippet.AuthorDisplayName, Mode=OneWay}"
+                                            Style="{StaticResource MediumLightText14}"
+                                            Grid.Row="0"
+                                            Grid.Column="1" />
+
+                                        <Label
+                                            Text="{Binding Snippet.TopLevelComment.Snippet.PublishedAt, Mode=OneWay, StringFormat='{0:dd-MMM-yyyy}'}"
+                                            Style="{StaticResource RegularLightText12}"
+                                            Grid.Row="0"
+                                            Grid.Column="2" />
+
+                                        <Label
+                                            Text="{Binding Snippet.TopLevelComment.Snippet.TextDisplay, Mode=OneWay}"
+                                            Style="{StaticResource RegularLightText12}"
+                                            Grid.Row="1"
+                                            Grid.Column="1"
+                                            Grid.ColumnSpan="2"
+                                            LineBreakMode="WordWrap"
+                                            VerticalOptions="Start" />
+
+                                    </Grid>
+
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+
+                    </CollectionView>
+
+                </botshtcontrols:BottomSheet.BottomSheetContent>
+            </botshtcontrols:BottomSheet>              
+
+        </Grid>
+
+    </baseviews:ViewBase.PageContent>
+
+</baseviews:ViewBase>
